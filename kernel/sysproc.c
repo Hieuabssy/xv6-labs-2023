@@ -71,10 +71,46 @@ sys_sleep(void)
 
 
 #ifdef LAB_PGTBL
+pte_t *walk(pagetable_t pagetable, uint64 va, int alloc);
 int
 sys_pgaccess(void)
 {
-  // lab pgtbl: your code here.
+  uint64 base;
+  int len;
+  uint64 user_mask;
+
+  // --- SỬA LẠI ĐOẠN NÀY ---
+  // Gọi hàm trực tiếp, không đặt trong if
+  argaddr(0, &base);
+  argint(1, &len);
+  argaddr(2, &user_mask);
+  // -----------------------
+
+  // Giới hạn len (max 64 trang)
+  if(len > 64 || len < 0) 
+    return -1;
+
+  struct proc *p = myproc();
+  uint64 bitmask = 0; 
+
+  // ... (Phần code xử lý logic bên dưới giữ nguyên) ...
+  
+  // Nhắc lại logic xử lý bên dưới để bạn tiện copy:
+  for(int i = 0; i < len; i++){
+    uint64 va = base + i * PGSIZE;
+    pte_t *pte = walk(p->pagetable, va, 0);
+
+    if(pte != 0 && (*pte & PTE_V) && (*pte & PTE_U)){
+      if(*pte & PTE_A){
+        bitmask |= (1L << i);
+        *pte &= ~PTE_A; // Xóa bit A
+      }
+    }
+  }
+
+  if(copyout(p->pagetable, user_mask, (char *)&bitmask, sizeof(bitmask)) < 0)
+    return -1;
+
   return 0;
 }
 #endif
