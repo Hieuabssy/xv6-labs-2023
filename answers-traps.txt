@@ -1,0 +1,46 @@
+1. Which registers contain arguments to functions? For example, which register holds 13 in
+main's call to printf?
+
+Trả lời: 
+- Các đối số hàm được truyền qua các register: a0, a1, a2, a3, a4, a5, a6, a7 (tương ứng x10..x17).
+- Thanh ghi giữ giá trị 13 là: a2
+
+2. Where is the call to function f in the assembly code for main? Where is the call to g? (Hint: the
+compiler may inline functions.)
+
+Trả lời:
+- Không có call nào đến f trong hàm main. Compiler đã inline (thay thế f(8) bằng 8+3).
+- Không có call nào đến g trong f hoặc main. Compiler cũng đã inline nội dung của g (x+3).
+
+3. At what address is the function printf located?
+
+Trả lời:
+- Địa chỉ hàm printf tại 0x630 (0000000000000630).
+
+4. What value is in the register ra just after the jalr to printf in main?
+- Giá trị ra sau jalr printf là: 0x38
+
+5. Trả lời:
+
+- Chương trình in ra: HE110 World.
+- Giải thích:
+57616 decimal = 0xE110 hex. Thư viện printf của xv6 sử dụng bảng số hex dạng chữ hoa
+("0123456789ABCDEF") nên %x in ra “E110”. Do đó chuỗi kết quả bắt đầu bằng
+“H” và tiếp theo là “E110”, tạo thành “HE110”.
+
+Biến i có giá trị 0x00646c72. Trên RISC-V (little-endian), giá trị này được lưu theo thứ tự byte:
+72 6c 64 00 tương ứng với chuỗi “rld”, nên %s in ra “rld”. Ghép lại ta được “HE110 World”.
+
+Nếu máy là big-endian, để có cùng chuỗi “rld” trong bộ nhớ, cần đặt:
+i = 0x726c6400.
+
+Không cần thay đổi giá trị 57616 vì việc in số nguyên bằng %x không phụ thuộc vào endianness.
+
+6. Trả lời:
+- Kết quả trong 1 lần chạy: x=3 y=10237 (y sẽ bằng 1 giá trị khác trong lần chạy khác)
+Kết quả in ra x luôn bằng 3 nhưng y sẽ là một giá trị không xác định (garbage value). 
+Lý do là lệnh printf yêu cầu hai tham số kiểu %d, nhưng hàm được gọi chỉ với một tham số duy nhất (3).
+Khi printf cố đọc giá trị cho %d thứ hai, nó lấy nội dung còn sót lại trong thanh ghi a1, 
+vốn là dữ liệu rác. Vì vậy giá trị sau “y=” sẽ thay đổi ngẫu nhiên và không có ý nghĩa.
+
+// note lại
